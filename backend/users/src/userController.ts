@@ -3,25 +3,26 @@ import { ObjectId } from 'mongodb';
 import UserOutils from './userOutils';
 import crypto from 'crypto';
 import { UserModel } from './userModel';
+import axios from 'axios';
 
 // Interface pour la création de l'utilisateur
 interface UtilisateurCréation {
     name: string; fname: string;
     email: string; login: string;
-    role: string; salt: string;
+    role: ObjectId; salt: string;
 }
 
 interface Utilisateur {
     name: string; fname: string;
     email: string; login: string;
-    role: string; password: string;
+    role: ObjectId; password: string;
 }
 
 class UserController {
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
             let users = await UserModel.collection.find({}).toArray();
-            
+
             if (!users) {
                 throw new Error("Liste utilisateur non trouvée");
             }
@@ -88,17 +89,21 @@ class UserController {
 
     async createUser(req: Request, res: Response): Promise<void> {
         try {
-            // role par défaut en user car quand on créer un user il est 
-            const { name, fname, email, login, role } = req.body;
-            if (!name || !fname || !email || !login || !role) {
+            const response = await axios.get('http://nginx-container:3001/role/name/client');
+            if (!response || !response.data) {
+                throw new Error("Erreur lors de la récupération du rôle par défaut");
+            }
+
+            const role = new ObjectId(response.data._id);
+            const { name, fname, email, login } = req.body;
+            if (!name || !fname || !email || !login) {
                 throw new Error("Information manquant");
             }
 
             const existingUser = await UserModel.collection.findOne({ email: email });
             const existingUser2 = await UserModel.collection.findOne({ login: login });
             if (existingUser || existingUser2) {
-                res.status(400).json({ message: "Le user existe déjà" });
-                return;
+                throw new Error("Le user existe déjà");
             }
 
             let nombreCaractererAleatoire: number = Math.floor(Math.random() * 20) + 1;

@@ -1,4 +1,4 @@
-import { MongoClient, ServerApiVersion, Collection, Db } from 'mongodb';
+import { MongoClient, ServerApiVersion, Db } from 'mongodb';
 import {UserModel} from './userModel';
 
 const uri: string = process.env.MONGO_URI_Noah as string;
