@@ -1,0 +1,46 @@
+.alert {
+    color: red;
+    font-weight: bold;
+}
+
+.popup {
+    background: rgba(0, 0, 22, 0.9);
+    color: white;
+    border: 2px solid #00ffcc;
+    padding: 20px;
+    max-width: 500px;
+    font-family: Arial, sans-serif;
+    display: block;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+}
+
+li {
+    list-style: none;
+}
+
+button {
+    background: linear-gradient(90deg, #00ffcc, #0077ff);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #00ffcc, 0 0 20px #0077ff;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #00ffcc, 0 0 30px #0077ff;
+}
+
+li {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}

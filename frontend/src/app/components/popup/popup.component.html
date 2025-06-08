@@ -1,0 +1,14 @@
+<div class="popup">
+    <h2>Résultat de l'API {{typeResult}}</h2>
+
+    <div *ngIf="parsedArray.length > 0">
+        <ul>
+            <li *ngFor="let item of parsedArray">
+                <p *ngIf="isArray(item)">{{ item[0] }}</p>
+                <p *ngIf="!isArray(item)">{{ item }}</p>
+            </li>
+        </ul>
+    </div>
+
+    <button mat-button (click)="close()">Fermer</button>
+</div>

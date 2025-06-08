@@ -1,0 +1,10 @@
+{
+  "name": "electron-angular-client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}

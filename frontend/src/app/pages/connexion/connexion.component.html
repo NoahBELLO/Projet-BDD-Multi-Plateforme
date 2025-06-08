@@ -1,0 +1,25 @@
+<div class="login-container">
+    <div class="controls">
+        <div class="combo-box">
+            <button (click)="formulaireLogin()" id="connexion">Connexion</button>
+            <button (click)="formulaireRegister()" id="inscription">Inscription</button>
+        </div>
+    </div>
+
+    <div class="view-container">
+        <app-formulaire *ngIf="typeForm !== ''" [data]="typeForm"></app-formulaire>
+    </div>
+
+    <div class="social-login">
+        <h2>Ou connectez-vous avec</h2>
+
+        <div class="social-buttons">
+            <button (click)="connexionGoogle()" class="socialConnexion" id="googleButton">
+                <img src="LogoGoogle.ico" alt="Google" id="google" />
+            </button>
+            <button (click)="connexionFacebook()" class="socialConnexion" id="facebookButton">
+                <img src="LogoFacebook.ico" alt="Facebook" id="facebook"/>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    border: 2px dashed #00ffcc;
+    box-shadow: 0 0 10px #0077ff;
+    width: 60%;
+    margin: 20px auto;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+}
+
+input,
+button {
+    width: 80%;
+    padding: 12px 20px;
+    margin: 10px 0;
+    border: 2px solid #00ffcc;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    font-size: 16px;
+    box-shadow: 0 0 8px #00ffcc;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+input::placeholder {
+    color: #cccccc;
+}
+
+input:focus {
+    box-shadow: 0 0 12px #00ffcc, 0 0 20px #0077ff;
+    border-color: #0077ff;
+}
+
+button {
+    cursor: pointer;
+    background-color: #0077ff;
+    box-shadow: 0 0 10px #0077ff;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #00ffcc;
+    color: #000;
+    box-shadow: 0 0 15px #00ffcc, 0 0 20px #00ffcc;
+}
+
+
+h2 {
+    font-size: 26px;
+    color: #00ffcc;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px #0077ff;
+}
+
+.form-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.form-group label {
+    flex: 0 0 150px; /* largeur fixe pour le label */
+    white-space: nowrap; /* empêche le label de sauter à la ligne */
+    text-align: right;
+    margin-right: 20px;
+    font-size: 16px;
+    color: #00ffcc;
+}
+
+.form-group input {
+    flex: 1;
+    max-width: 400px; /* largeur max pour uniformiser tous les champs */
+}
+
+// .resume-container p {
+//     font-size: 18px;
+//     color: white;
+//     margin: 8px 0;
+//     padding: 5px 15px;
+//     background: rgba(0, 255, 204, 0.2);
+//     border-radius: 5px;
+//     box-shadow: 0 0 5px #0077ff;
+// }

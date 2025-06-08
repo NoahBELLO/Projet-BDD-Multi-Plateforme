@@ -1,0 +1,13 @@
+<div class="dashboard-container">
+    <div class="controls">
+        <div class="combo-box">
+            <button (click)="formulaireOLAP()" id="visualisation">API OLAP</button>
+            <button (click)="formulaireOLTP()" id="donnees">API OLTP</button>
+        </div>
+    </div>
+
+    <div class="view-container">
+        <h2 *ngIf="typeForm === ''">Choississez votre API</h2>
+        <app-formulaire *ngIf="typeForm !== ''" [data]="typeForm"></app-formulaire>
+    </div>
+</div>

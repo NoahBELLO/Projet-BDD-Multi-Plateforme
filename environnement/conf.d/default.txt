@@ -1,0 +1,16 @@
+# Fichier de configuration de NGINX pour l'utilisation d'une API Gateway
+# Mettre ce fichier en default.conf au lieu de default.txt
+server {
+    listen 3001; # Port modifiable
+    server_name localhost;
+
+    # Exemple de redirection
+    location /cheminPourRedirection { # chemin modifiable
+        proxy_pass http://cheminAPI:5000/; # chemin modifiable avec le port selon l'API
+        # Parametre modifiable selon le besoin
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

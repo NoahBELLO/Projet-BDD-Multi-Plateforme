@@ -1,0 +1,149 @@
+# docker-compose up --build
+#l'installation de flask et mysql:
+#pip install flask flask-mysql mysql-connector-python python-dotenv
+
+services:
+  bdd_oltp:
+    container_name: bdd_oltp
+    image: postgres:17
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${PostgreSql_User}
+      POSTGRES_PASSWORD: ${PostgreSql_Password}
+      POSTGRES_DB: ${PostgreSql_Database}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - reseau_projet
+
+  # Clickhouse (déjà configuré pour l'API OLAP PYTHON)
+  clickhouse:
+    container_name: clickhouse_container
+    image: clickhouse/clickhouse-server:latest
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: root
+      CLICKHOUSE_DB: default
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - reseau_projet
+
+  # API OLTP en TYPESCRIPT
+  api_oltp:
+    container_name: api_oltp
+    build:
+      context: ../backend/api_oltp
+    env_file:
+      - ../backend/api_oltp/.env 
+    volumes:
+      - ../backend/api_oltp:/usr/src/app
+    ports:
+      - 3002:3002
+    depends_on:
+      - bdd_oltp
+    networks:
+      - reseau_projet
+    command: ["sh", "./install.sh", "bdd_oltp"]
+
+  # API OLAP en PYTHON
+  api_olap:
+    container_name: api_olap
+    build:
+      context: ../backend/api_olap
+    environment:
+      - PYTHONPATH=/usr/src/app
+    env_file:
+      - ../backend/api_olap/.env
+    volumes:
+      - ../backend/api_olap:/usr/src/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - clickhouse
+    networks:
+      - reseau_projet
+
+  # API GATEWAY (NGINX)
+  nginx:
+    container_name: nginx-container
+    image: nginx:latest
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+    networks:
+      - reseau_projet
+    depends_on:
+      - api_oltp
+      - api_olap
+      - microservice_authentification
+      - microservice_role
+      - microservice_user
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "4200:4200"
+    volumes:
+      - ../frontend:/usr/src/app
+    networks:
+      - reseau_projet
+  
+  microservice_authentification:
+    container_name: microservice_authentification
+    build:
+      context: ../backend/authentification
+    volumes:
+      - ../backend/authentification:/usr/src/app
+    ports:
+      - 5003:5003
+    networks:
+      - reseau_projet
+    command: ["sh", "./install.sh"]
+
+  microservice_role:
+    container_name: microservice_role 
+    build:
+      context: ../backend/roles
+    volumes:
+      - ../backend/roles:/usr/src/app
+    ports:
+      - 5002:5002
+    networks:
+      - reseau_projet
+    command: ["sh", "./install.sh"]
+
+  microservice_user:
+    container_name: microservice_user 
+    build:
+      context: ../backend/users
+    volumes:
+      - ../backend/users:/usr/src/app
+    ports:
+      - 5001:5001
+    networks:
+      - reseau_projet
+    command: ["sh", "./install.sh"]
+
+
+# Pour créer un network : docker network create "nom_du_reseau"
+networks:
+  reseau_projet:
+    driver: bridge
+    external: true
+
+volumes:
+  postgres_data:
+  clickhouse_data: # mysql_data: # Décommente si MySQL est activé
