@@ -6,7 +6,6 @@ import AuthController from "./src/authController";
 import 'dotenv/config';
 import "./src/authController";
 import { db } from './src/db';
-import authMiddleware from './src/authMiddelware';
 
 dotenv.config();
 const app: Application = express();
@@ -18,7 +17,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 db()
-app.use(authMiddleware);
 app.use("/authentification", authRoutes);
 
 // Middleware pour gérer les erreurs 500 (erreurs serveur)

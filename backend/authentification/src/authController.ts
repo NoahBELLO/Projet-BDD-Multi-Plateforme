@@ -113,8 +113,8 @@ class AuthController {
                 throw new Error("Erreur lors de la création ou modification du token dans la base de données");
             }
 
-            res.cookie("tokenAccess", `Bearer ${tokenAccess}`/* , { httpOnly: false, secure: false, sameSite: "strict" } */);
-            res.cookie("tokenRefresh", tokenRefresh/* , { httpOnly: false, secure: false, sameSite: "strict" } */);
+            res.cookie("tokenAccess", `Bearer ${tokenAccess}`, { httpOnly: true, secure: true, sameSite: "strict" });
+            res.cookie("tokenRefresh", tokenRefresh, { httpOnly: true, secure: true, sameSite: "strict" });
             res.status(201).json({ message: "Compte créé" });
         }
         catch (err) {

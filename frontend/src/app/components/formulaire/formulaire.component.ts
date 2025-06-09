@@ -163,10 +163,11 @@ export class FormulaireComponent implements OnChanges {
       return;
     }
     const body = { name, fname, email, login, motDePasse: password };
-    console.log(body);
     this.authService.register(body).subscribe({
       next: (response) => {
         console.log(response);
+        // controle de token via une route pour vérifier que les cookies on bien été créer
+        this.routes.navigate(['/accueil']);
       },
       error: (error) => {
         console.error("Erreur lors de la requête Flag :", error);

@@ -1,11 +1,15 @@
 import { Router } from 'express';
 import AuthController from "./authController";
 const router: Router = Router();
+import authMiddleware from './authMiddleware';
 
 const authController: AuthController = new AuthController();
-router.get("/bonjour", (req, res) => {
-    console.log(req.auth);
-    res.send("Bonjour");
+router.get("/check", authMiddleware, (req, res) => {
+    if (req.auth) {
+        res.json({ loggedIn: true, userId: req.auth.userId });
+    } else {
+        res.json({ loggedIn: false });
+    }
 });
 
 // GET

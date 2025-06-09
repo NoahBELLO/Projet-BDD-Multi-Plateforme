@@ -22,8 +22,7 @@ export class AuthentificationService {
   // }
 
   register(body: object): Observable<any> {
-    console.log(body);
-    return this.http.post(`${this.apiUrl}/register`, body);
+    return this.http.post(`${this.apiUrl}register`, body, { withCredentials: true });
     // const body = {
     //   "item_id": item_id,
     //   "limit": limit
@@ -31,6 +30,10 @@ export class AuthentificationService {
     // this.hashPasswordService.hashPassword('monMotDePasse123')
     //   .then(hash => console.log('Mot de passe hashé :', hash));
     // return this.http.post(this.apiUrlOLAP, body);
+  }
+
+  checkCookie(): Observable<any> {
+    return this.http.get(`${this.apiUrl}check`, { withCredentials: true });
   }
 
   isLoggedIn(): boolean {

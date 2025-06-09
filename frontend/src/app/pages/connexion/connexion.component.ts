@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormulaireComponent } from '../../components/formulaire/formulaire.component';
 import { NgIf } from '@angular/common';
+import { AuthentificationService } from '../../services/authentification.service';
 
 @Component({
   selector: 'app-connexion',
@@ -10,7 +11,7 @@ import { NgIf } from '@angular/common';
   styleUrl: './connexion.component.scss'
 })
 export class ConnexionComponent {
-  constructor() { }
+  constructor(private authService: AuthentificationService) { }
   typeForm: string = "login";
 
   formulaireLogin() {
@@ -23,9 +24,6 @@ export class ConnexionComponent {
 
   connexionGoogle() {
     console.log("Connexion avec Google");
-  }
-
-  connexionFacebook() {
-    console.log("Connexion avec Facebook");
+    window.location.href = "http://localhost:3001/authentification/google";
   }
 }
