@@ -1,10 +1,10 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import userRoutes from "./src/userRoutes";
-import UserController from "./src/userController";
+import authRoutes from "./src/authRoutes";
+import AuthController from "./src/authController";
 import 'dotenv/config';
-import "./src/userController";
+import "./src/authController";
 import { db } from './src/db';
 import authMiddleware from './src/authMiddelware';
 
@@ -12,14 +12,14 @@ dotenv.config();
 const app: Application = express();
 const port: number = parseInt(process.env.PORT as string);
 
-const userController: UserController = new UserController();
+const authController: AuthController = new AuthController();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 db()
 app.use(authMiddleware);
-app.use("/authentification", userRoutes);
+app.use("/authentification", authRoutes);
 
 // Middleware pour gérer les erreurs 500 (erreurs serveur)
 app.use(

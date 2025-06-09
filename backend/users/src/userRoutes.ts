@@ -8,6 +8,9 @@ router.get('/', userController.getAllUsers);
 router.get('/id/:id', userController.getUserById);
 router.get('/email/:email', userController.getUserByEmail);
 router.get('/login/:login', userController.getUserByLogin);
+router.get('/filtrer/email/:email', userController.getUserByEmailFiltrer);
+router.get('/filtrer/login/:login', userController.getUserByLoginFiltrer);
+router.get('/filtrer/id/:id', userController.getUserByIdFiltrer);
 
 // POST
 router.post('/', userController.createUser);

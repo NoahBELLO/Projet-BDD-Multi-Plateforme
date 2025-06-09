@@ -51,6 +51,24 @@ class UserController {
         }
     }
 
+    async getUserByIdFiltrer(req: Request, res: Response): Promise<void> {
+        try {
+            let { id } = req.params;
+            if (!id) {
+                throw new Error("ID manquant");
+            }
+
+            let user = await UserModel.collection.findOne({ _id: new ObjectId(id) }, { projection: { _id: 1, role: 1, salt: 1, password: 1 } });
+            if (!user) {
+                throw new Error("Utilisateur non trouvée");
+            }
+            res.status(201).json(user);
+        }
+        catch (err) {
+            res.status(500).json({ message: "Aucun utilisateur trouver" });
+        }
+    }
+
     async getUserByEmail(req: Request, res: Response): Promise<void> {
         try {
             let { email } = req.params;
@@ -59,6 +77,24 @@ class UserController {
             }
 
             let user = await UserModel.collection.findOne({ email: email });
+            if (!user) {
+                throw new Error("Utilisateur non trouvée");
+            }
+            res.status(201).json(user);
+        }
+        catch (err) {
+            res.status(500).json({ message: "Aucun utilisateur trouver" });
+        }
+    }
+
+    async getUserByEmailFiltrer(req: Request, res: Response): Promise<void> {
+        try {
+            let { email } = req.params;
+            if (!email) {
+                throw new Error("Email manquant");
+            }
+
+            let user = await UserModel.collection.findOne({ email: email }, { projection: { _id: 1, role: 1, salt: 1, password: 1 } });
             if (!user) {
                 throw new Error("Utilisateur non trouvée");
             }
@@ -87,9 +123,27 @@ class UserController {
         }
     }
 
+    async getUserByLoginFiltrer(req: Request, res: Response): Promise<void> {
+        try {
+            let { login } = req.params;
+            if (!login) {
+                throw new Error("Login manquant");
+            }
+
+            let user = await UserModel.collection.findOne({ login: login }, { projection: { _id: 1, role: 1, salt: 1, password: 1 } });
+            if (!user) {
+                throw new Error("Utilisateur non trouvée");
+            }
+            res.status(201).json(user);
+        }
+        catch (err) {
+            res.status(500).json({ message: "Aucun utilisateur trouver" });
+        }
+    }
+
     async createUser(req: Request, res: Response): Promise<void> {
         try {
-            const response = await axios.get(`${process.env.ROLE_URL}/name/client`);
+            const response = await axios.get(`${process.env.ROLE_URL}name/client`);
             if (!response || !response.data) {
                 throw new Error("Erreur lors de la récupération du rôle par défaut");
             }
@@ -118,11 +172,11 @@ class UserController {
             }
 
             let user = await UserModel.collection.insertOne(newUtilisateur);
-            if (!user) {
+            if (!user || !user.insertedId) {
                 throw new Error("Utilisateur non crée");
             }
 
-            res.status(201).json({ salt: salt });
+            res.status(201).json({ salt: salt, _id: user.insertedId, role: role });
         }
         catch (err) {
             res.status(500).json({ message: "Aucun utilisateur crée" });
@@ -138,7 +192,7 @@ class UserController {
             }
 
             // Hasher le mot de passe en FrontEnd
-            const passwordHasher = crypto.createHash('sha256').update(motDePasse + salt).digest('hex');
+            const passwordHasher = crypto.createHash('sha256').update(motDePasse + process.env.PEPPER + salt).digest('hex');
             if (!passwordHasher) {
                 throw new Error("Erreur lors de la création du hash du mot de passe");
             }
@@ -178,7 +232,7 @@ class UserController {
                 throw new Error("Erreur lors de la création du hash du mot de passe");
             }
 
-            let updateUtilisateur: Utilisateur = { name, fname, email, login, role, password: passwordHasher };
+            let updateUtilisateur = { name, fname, email, login, role, password: passwordHasher };
             if (!updateUtilisateur) {
                 throw new Error("Information manquant");
             }

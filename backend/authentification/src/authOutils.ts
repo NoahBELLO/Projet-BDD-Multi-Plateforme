@@ -94,30 +94,19 @@ class Outils {
     }
 
     private static verifyJWTToken(token: string = ''): PayloadJWT | false {
-
-        // 1. Séparer le token JWT en 3 (tête, corps, signature)
         const [base64Header, base64Payload, signature] = token.split('.');
-
-        // 2. Regénérer la signature pour le header et le payload
         const expectedSignature = this.generateSignature(base64Header, base64Payload, process.env.JWT_SECRET_KEY as string);
-
-        // 3. Comparer la signature regénérer avec l'originale
         if (expectedSignature !== signature) {
             return false;
         }
 
-        // 4. Décoder le payload et le parser en un objet JavaScript
         const payloadString = Buffer.from(base64Payload, 'base64url').toString();
         const payload: PayloadJWT = JSON.parse(payloadString);
-
-        // 5. Vérifier l'expiration du token JWT
         if (payload.expiration && Date.now() > payload.expiration) {
             return false;
         }
 
-        // 6. Renvoyer le corps du token JWT parsé en un objet JavaScript
         return payload;
-
     }
 
     private static fingerprintTokenVerify(claims1: string, claims2: string): boolean {
