@@ -89,7 +89,7 @@ class UserController {
 
     async createUser(req: Request, res: Response): Promise<void> {
         try {
-            const response = await axios.get('http://nginx-container:3001/role/name/client');
+            const response = await axios.get(`${process.env.ROLE_URL}/name/client`);
             if (!response || !response.data) {
                 throw new Error("Erreur lors de la récupération du rôle par défaut");
             }
