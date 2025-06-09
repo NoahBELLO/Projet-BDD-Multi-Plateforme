@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthentificationService {
-  // private apiUrl = 'http://localhost:3001/api';
+  private apiUrl = 'http://localhost:3001/authentification/';
 
   constructor(private http: HttpClient) { }
 
@@ -20,16 +21,17 @@ export class AuthentificationService {
   //   return this.http.post(this.apiUrlOLAP, body);
   // }
 
-  // register(login: string, password: string): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/users/login`, { login, password });
-  // const body = {
-  //     "item_id": item_id,
-  //     "limit": limit
-  //   };
-  // this.hashPasswordService.hashPassword('monMotDePasse123')
-  // .then(hash => console.log('Mot de passe hashé :', hash));
-  //   return this.http.post(this.apiUrlOLAP, body);
-  // }
+  register(body: object): Observable<any> {
+    console.log(body);
+    return this.http.post(`${this.apiUrl}/register`, body);
+    // const body = {
+    //   "item_id": item_id,
+    //   "limit": limit
+    // };
+    // this.hashPasswordService.hashPassword('monMotDePasse123')
+    //   .then(hash => console.log('Mot de passe hashé :', hash));
+    // return this.http.post(this.apiUrlOLAP, body);
+  }
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');

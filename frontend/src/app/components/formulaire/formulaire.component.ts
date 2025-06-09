@@ -141,7 +141,7 @@ export class FormulaireComponent implements OnChanges {
   }
 
   informationsLogin(email: string, password: string): void {
-    console.log("Tentative de connexion avec l'email :", email, "et le mot de passe :", password)
+    console.log("Tentative de connexion avec l'email :", email, "et le mot de passe :", password);
     //   this.donneeAPI.informationOLTP(item_id, limit).subscribe({
     //     next: (response) => {
     //       this.dialog.open(PopupComponent, {
@@ -158,19 +158,19 @@ export class FormulaireComponent implements OnChanges {
   }
 
   informationsRegister(name: string, fname: string, email: string, login: string, password: string, confirmPassword: string): void {
-    console.log("Tentative d'inscription avec l'email :", email, "et le mot de passe :", password)
-    //   this.donneeAPI.informationOLTP(item_id, limit).subscribe({
-    //     next: (response) => {
-    //       this.dialog.open(PopupComponent, {
-    //         width: `${this.baseWidth + limit * 10}px`,
-    //         height: `${this.baseHeight + limit * 5}px`,
-    //         data: response
-    //       });
-    //     },
-    //     error: (error) => {
-    //       console.error("Erreur lors de la requête Flag :", error);
-    //     }
-    //   });
-    // }
+    if (password !== confirmPassword) {
+      console.error("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    const body = { name, fname, email, login, motDePasse: password };
+    console.log(body);
+    this.authService.register(body).subscribe({
+      next: (response) => {
+        console.log(response);
+      },
+      error: (error) => {
+        console.error("Erreur lors de la requête Flag :", error);
+      }
+    });
   }
 }

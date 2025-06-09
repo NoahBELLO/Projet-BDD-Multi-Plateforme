@@ -270,6 +270,122 @@ class AuthController {
         }
     }
 
+    async googleAuth(req: Request, res: Response): Promise<void> {
+        try {
+            if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REDIRECT_URI) {
+                throw new Error("Missing Google OAuth config");
+            }
+
+            const redirectUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}` +
+                `&redirect_uri=${encodeURIComponent(process.env.GOOGLE_REDIRECT_URI as string)}&response_type=code&scope=openid%20email%20profile`;
+
+            res.redirect(redirectUrl);
+        } catch (err) {
+            res.status(401).json({ message: "Redirection échouée" });
+        }
+    }
+
+    // async googleAuthCallback(req: Request, res: Response): Promise<void> {
+    //     try {
+    //         const { code } = req.query;
+    //         if (!code) {
+    //             throw new Error("Authorization code manquant");
+    //         }
+
+    //         const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', null, {
+    //             params: {
+    //                 code, client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    //                 redirect_uri: process.env.GOOGLE_REDIRECT_URI, grant_type: 'authorization_code'
+    //             },
+    //             headers: {
+    //                 'Content-Type': 'application/x-www-form-urlencoded'
+    //             }
+    //         });
+
+    //         const { access_token } = tokenResponse.data;
+    //         if (!access_token) {
+    //             throw new Error("Erreur lors de l'obtention du token d'accès");
+    //         }
+
+    //         const userInfoResponse = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
+    //             headers: {
+    //                 Authorization: `Bearer ${access_token}`
+    //             }
+    //         });
+
+    //         const userInfo = userInfoResponse.data;
+    //         if (!userInfo) {
+    //             throw new Error("Erreur lors de la récupération des informations utilisateur");
+    //         }
+
+    //         // Ici, vous pouvez créer ou mettre à jour l'utilisateur dans votre base de données
+    //         // et générer des tokens JWT pour l'authentification
+
+    //         res.status(200).json({ message: "Authentification réussie", user: userInfo });
+    //     } catch (err) {
+    //         res.status(401).json({ message: "Redirection échouée" });
+    //     }
+    // }
+
+    async facebookAuth(req: Request, res: Response): Promise<void> {
+        try {
+            if (!process.env.FACEBOOK_CLIENT_ID || !process.env.GOOGLE_REDIRECT_URI) {
+                throw new Error("Missing Google OAuth config");
+            }
+
+            const redirectUrl = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}` +
+                `&redirect_uri=${encodeURIComponent(process.env.FACEBOOK_REDIRECT_URI as string)}&scope=email,public_profile`;
+
+            res.redirect(redirectUrl);
+        } catch (err) {
+            res.status(401).json({ message: "Redirection échouée" });
+        }
+    }
+
+    // async facebookAuthCallback(req: Request, res: Response): Promise<void> {
+    //     try {
+    //         const { code } = req.query;
+    //   if (!code) return res.status(400).send('No code received');
+
+    //   try {
+    //     // Step 3 - Exchange code for access token
+    //     const tokenRes = await axios.get('https://graph.facebook.com/v20.0/oauth/access_token', {
+    //       params: {
+    //         client_id: FACEBOOK_CLIENT_ID,
+    //         client_secret: FACEBOOK_CLIENT_SECRET,
+    //         redirect_uri: FACEBOOK_REDIRECT_URI,
+    //         code
+    //       }
+    //     });
+
+    //     const { access_token } = tokenRes.data;
+
+    //     // Step 4 - Fetch user profile
+    //     const profileRes = await axios.get('https://graph.facebook.com/me', {
+    //       params: {
+    //         fields: 'id,name,email',
+    //         access_token
+    //       }
+    //     });
+
+    //     const profile = profileRes.data;
+
+    //     // Step 5 - Créer un JWT personnalisé
+    //     const myToken = jwt.sign({
+    //       id: profile.id,
+    //       name: profile.name,
+    //       email: profile.email
+    //     }, JWT_SECRET, { expiresIn: '1h' });
+
+    //     res.json({
+    //       message: 'Facebook OAuth successful',
+    //       facebookProfile: profile,
+    //       jwt: myToken
+    //     });
+    //     } catch (err) {
+    //         res.status(401).json({ message: "Redirection échouée" });
+    //     }
+    // }
 }
 
 export default AuthController;

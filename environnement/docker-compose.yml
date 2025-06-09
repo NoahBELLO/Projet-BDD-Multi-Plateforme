@@ -88,18 +88,18 @@ services:
       - microservice_role
       - microservice_user
 
-  # frontend:
-  #   container_name: frontend
-  #   build:
-  #     context: ../frontend
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "4200:4200"
-  #   volumes:
-  #     - ../frontend:/usr/src/app
-  #   networks:
-  #     - reseau_projet
+  frontend:
+    container_name: frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "4200:4200"
+    volumes:
+      - ../frontend:/usr/src/app
+    networks:
+      - reseau_projet
   
   microservice_authentification:
     container_name: microservice_authentification

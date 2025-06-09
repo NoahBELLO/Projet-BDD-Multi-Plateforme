@@ -8,6 +8,12 @@ router.get("/bonjour", (req, res) => {
     res.send("Bonjour");
 });
 
+// GET
+router.get('/google', authController.googleAuth);
+// router.get('/google/callback', authController.googleAuthCallback);
+router.get('/facebook', authController.facebookAuth);
+// router.get('/facebook/callback', authController.facebookAuthCallback);
+
 // POST
 router.post('/register', authController.register);
 router.post('/login', authController.login);
