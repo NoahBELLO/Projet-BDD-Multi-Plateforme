@@ -140,21 +140,18 @@ export class FormulaireComponent implements OnChanges {
     });
   }
 
-  informationsLogin(email: string, password: string): void {
-    console.log("Tentative de connexion avec l'email :", email, "et le mot de passe :", password);
-    //   this.donneeAPI.informationOLTP(item_id, limit).subscribe({
-    //     next: (response) => {
-    //       this.dialog.open(PopupComponent, {
-    //         width: `${this.baseWidth + limit * 10}px`,
-    //         height: `${this.baseHeight + limit * 5}px`,
-    //         data: response
-    //       });
-    //     },
-    //     error: (error) => {
-    //       console.error("Erreur lors de la requête Flag :", error);
-    //     }
-    //   });
-    // }
+  informationsLogin(identifiant: string, motDePasse: string): void {
+    this.authService.hashSHA256(motDePasse).then(hash => {
+      const body = { identifiant, motDePasse: hash };
+      this.authService.login(body).subscribe({
+        next: (response) => {
+          this.routes.navigate(['/accueil']);
+        },
+        error: (error) => {
+          console.error("Erreur lors de la requête Flag :", error);
+        }
+      });
+    });
   }
 
   informationsRegister(name: string, fname: string, email: string, login: string, password: string, confirmPassword: string): void {
@@ -162,16 +159,17 @@ export class FormulaireComponent implements OnChanges {
       console.error("Les mots de passe ne correspondent pas.");
       return;
     }
-    const body = { name, fname, email, login, motDePasse: password };
-    this.authService.register(body).subscribe({
-      next: (response) => {
-        console.log(response);
-        // controle de token via une route pour vérifier que les cookies on bien été créer
-        this.routes.navigate(['/accueil']);
-      },
-      error: (error) => {
-        console.error("Erreur lors de la requête Flag :", error);
-      }
+
+    this.authService.hashSHA256(password).then(hash => {
+      const body = { name, fname, email, login, motDePasse: hash };
+      this.authService.register(body).subscribe({
+        next: (response) => {
+          this.routes.navigate(['/accueil']);
+        },
+        error: (error) => {
+          console.error("Erreur lors de la requête Flag :", error);
+        }
+      });
     });
   }
 }

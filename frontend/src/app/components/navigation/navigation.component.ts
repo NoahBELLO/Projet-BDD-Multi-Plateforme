@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthentificationService } from '../../services/authentification.service';
-import { NgIf } from '@angular/common';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-navigation',
   standalone: true,
-  imports: [RouterLink, NgIf],
+  imports: [RouterLink, NgIf, AsyncPipe],
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.scss']
 })
@@ -16,6 +16,5 @@ export class NavigationComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/connexion']);
-    console.log("Déconnexion réussie");
   }
 }

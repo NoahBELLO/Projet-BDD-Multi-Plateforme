@@ -1,47 +1,50 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthentificationService {
   private apiUrl = 'http://localhost:3001/authentification/';
+  private loggedInSubject = new BehaviorSubject<boolean>(false);
+  loggedIn$ = this.loggedInSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    this.isLoggedIn();
+  }
 
-  // login(login: string, password: string): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/users/login`, { login, password });
-  // const body = {
-  //     "item_id": item_id,
-  //     "limit": limit
-  //   };
-  // this.hashPasswordService.hashPassword('monMotDePasse123')
-  // .then(hash => console.log('Mot de passe hashé :', hash));
-  //   return this.http.post(this.apiUrlOLAP, body);
-  // }
+  login(body: object): Observable<any> {
+    return this.http.post(`${this.apiUrl}login`, body, { withCredentials: true }).pipe(
+      tap(() => this.isLoggedIn())
+    );;
+  }
 
   register(body: object): Observable<any> {
-    return this.http.post(`${this.apiUrl}register`, body, { withCredentials: true });
-    // const body = {
-    //   "item_id": item_id,
-    //   "limit": limit
-    // };
-    // this.hashPasswordService.hashPassword('monMotDePasse123')
-    //   .then(hash => console.log('Mot de passe hashé :', hash));
-    // return this.http.post(this.apiUrlOLAP, body);
+    return this.http.post(`${this.apiUrl}register`, body, { withCredentials: true }).pipe(
+      tap(() => this.isLoggedIn()) // 👈 important !
+    );;
   }
 
   checkCookie(): Observable<any> {
     return this.http.get(`${this.apiUrl}check`, { withCredentials: true });
   }
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+  isLoggedIn(): void {
+    this.checkCookie().subscribe({
+      next: (response) => {
+        this.loggedInSubject.next(!!response.loggedIn);
+      },
+      error: () => {
+        this.loggedInSubject.next(false);
+      }
+    });
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    this.loggedInSubject.next(false);
   }
 
   async hashSHA256(message: string): Promise<string> {

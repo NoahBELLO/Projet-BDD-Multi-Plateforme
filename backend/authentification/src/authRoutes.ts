@@ -14,9 +14,7 @@ router.get("/check", authMiddleware, (req, res) => {
 
 // GET
 router.get('/google', authController.googleAuth);
-// router.get('/google/callback', authController.googleAuthCallback);
-router.get('/facebook', authController.facebookAuth);
-// router.get('/facebook/callback', authController.facebookAuthCallback);
+router.get('/google/callback', authController.googleAuthCallback);
 
 // POST
 router.post('/register', authController.register);

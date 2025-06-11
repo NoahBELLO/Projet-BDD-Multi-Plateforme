@@ -23,7 +23,6 @@ export class ConnexionComponent {
   }
 
   connexionGoogle() {
-    console.log("Connexion avec Google");
     window.location.href = "http://localhost:3001/authentification/google";
   }
 }
