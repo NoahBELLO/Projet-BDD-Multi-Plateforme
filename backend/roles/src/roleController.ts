@@ -18,7 +18,7 @@ class RoleController {
 
     async getRoleByName(req: Request, res: Response): Promise<void> {
         try {
-            let { name } = req.params;            
+            let { name } = req.params;
             if (!name) {
                 throw new Error("Nom manquant");
             }
@@ -162,6 +162,41 @@ class RoleController {
         }
         catch (err) {
             res.status(500).json({ message: "Aucun rôle supprimé" });
+        }
+    }
+
+    async convertion(req: Request, res: Response): Promise<void> {
+        try {
+            const roles: string[] = req.body.roles;
+
+            if (!Array.isArray(roles) || !roles) {
+                res.status(400).json({ error: 'roleIds must be an array' });
+                return;
+            }
+
+            const objectIds: ObjectId[] = roles.map(id => new ObjectId(id));
+            if (!objectIds) {
+                res.status(400).json({ error: 'roleIds must be an array' });
+                return;
+            }
+
+            const rolesBDD = await RoleModel.collection.find({ _id: { $in: objectIds } }).project({ name: 1 }).toArray();
+            if (!rolesBDD) {
+                res.status(400).json({ error: 'roleIds must be an array' });
+                return;
+            }
+
+            const nameRoles: string[] = rolesBDD.map(r => r.name);
+            if (!nameRoles) {
+                res.status(400).json({ error: 'roleIds must be an array' });
+                return;
+            }
+
+            res.status(201).json({ nameRoles: nameRoles });
+        }
+        catch (err) {
+            res.status(500).json({ error: 'Erreur serveur' });
+            return
         }
     }
 }

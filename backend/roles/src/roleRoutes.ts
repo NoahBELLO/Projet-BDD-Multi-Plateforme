@@ -11,6 +11,7 @@ router.get('/name/:name', roleController.getRoleByName);
 
 // POST
 router.post('/', roleController.createRole);
+router.post('/convertion', roleController.convertion)
 
 // PUT
 router.put('/id/:id', roleController.updateRoleById);

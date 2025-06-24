@@ -2,9 +2,10 @@ import { Router } from 'express';
 import AuthController from "./authController";
 const router: Router = Router();
 import authMiddleware from './authMiddleware';
+import roleMiddleware from './roleMiddleware';
 
 const authController: AuthController = new AuthController();
-router.get("/check", authMiddleware, (req, res) => {
+router.get("/check", authMiddleware, roleMiddleware(["client"]), (req, res) => {
     if (req.auth) {
         res.json({ loggedIn: true, userId: req.auth.userId });
     } else {
@@ -20,5 +21,6 @@ router.get('/google/callback', authController.googleAuthCallback);
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/refresh', authController.refresh);
+router.post('/logout', authController.logout);
 
 export default router;

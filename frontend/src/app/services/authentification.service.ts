@@ -24,7 +24,13 @@ export class AuthentificationService {
 
   register(body: object): Observable<any> {
     return this.http.post(`${this.apiUrl}register`, body, { withCredentials: true }).pipe(
-      tap(() => this.isLoggedIn()) // 👈 important !
+      tap(() => this.isLoggedIn())
+    );;
+  }
+
+  refreshToken(body: object): Observable<any> {
+    return this.http.post(`${this.apiUrl}refresh`, body, { withCredentials: true }).pipe(
+      tap(() => this.isLoggedIn())
     );;
   }
 
@@ -44,7 +50,9 @@ export class AuthentificationService {
   }
 
   logout(): void {
-    this.loggedInSubject.next(false);
+    this.http.post(`${this.apiUrl}logout`, {}, { withCredentials: true }).subscribe(() => {
+      this.loggedInSubject.next(false);
+    });
   }
 
   async hashSHA256(message: string): Promise<string> {

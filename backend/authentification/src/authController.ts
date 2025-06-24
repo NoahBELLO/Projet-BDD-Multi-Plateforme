@@ -4,6 +4,7 @@ import Outils from './authOutils';
 import crypto from 'crypto';
 import { TokenModel } from './tokenModel';
 import axios from "axios";
+import { nextTick } from 'process';
 
 // Interface pour la création de l'utilisateur
 interface Register {
@@ -124,9 +125,8 @@ class AuthController {
 
     async login(req: Request, res: Response): Promise<void> {
         try {
-            // Récupérer le mot de passe hasher en FrontEnd
-            let { identifiant, motDePasse, /* mdpHasher */ } = req.body;
-            if (!identifiant /* || !mdpHasher */ || !motDePasse) {
+            let { identifiant, motDePasse } = req.body;
+            if (!identifiant || !motDePasse) {
                 throw new Error("Information manquant");
             }
 
@@ -136,12 +136,9 @@ class AuthController {
             } else {
                 response = await axios.get(`${process.env.USER_URL}filtrer/login/${identifiant}`);
             }
-
-            // Hasher le mot de passe en FrontEnd
-            // const mdpHasher = crypto.createHash('sha256').update(motDePasse + user.grainDeSel).digest('hex');
-            // if (!mdpHasher) {
-            //     throw new Error("Erreur lors de la création du hash du mot de passe");
-            // }
+            if (!response || !response.data) {
+                throw new Error("Information manquant");
+            }
 
             const compareMdpHasher = crypto.createHash('sha256').update(motDePasse + process.env.PEPPER + response.data.salt).digest('hex');
             if (compareMdpHasher !== response.data.password) {
@@ -204,12 +201,42 @@ class AuthController {
                 throw new Error("Erreur lors de la création ou modification du token dans la base de données");
             }
 
-            res.cookie("tokenAccess", `Bearer ${tokenAccess}`/* , { httpOnly: false, secure: false, sameSite: "strict" } */);
-            res.cookie("tokenRefresh", tokenRefresh/* , { httpOnly: false, secure: false, sameSite: "strict" } */);
+            res.cookie("tokenAccess", `Bearer ${tokenAccess}`, { httpOnly: true, secure: true, sameSite: "strict" });
+            res.cookie("tokenRefresh", tokenRefresh, { httpOnly: true, secure: true, sameSite: "strict" });
             res.status(201).json({ message: "Utilisateur connectée" });
         }
         catch (err) {
             res.status(500).json({ message: "Utilisateur non connectée" });
+        }
+    }
+
+    async logout(req: Request, res: Response): Promise<void> {
+        try {
+            const { tokenAccess, tokenRefresh }: Record<string, string> = req.cookies;
+            if (!tokenAccess || !tokenRefresh) {
+                res.status(401).json({ message: "Token(s) manquant(s)" });
+                return;
+            }
+
+            const deviceFingerprintTest: string = Outils.createDeviceFingerprint(req);
+
+            const goodAccessToken = Outils.verifyAccessToken(tokenAccess, deviceFingerprintTest);
+            if (!goodAccessToken) {
+                res.status(401).json({ message: "AccessToken invalide ou expiré" });
+                return;
+            }
+
+            const result = await TokenModel.collection.deleteOne({ userId: new ObjectId(goodAccessToken.userId) });
+            if (result.deletedCount === 0) {
+                throw new Error("Aucun token supprimé");
+            }
+
+            res.clearCookie("tokenAccess");
+            res.clearCookie("tokenRefresh");
+            res.status(200).json({ message: "Déconnecté" });
+        }
+        catch (err) {
+            res.status(500).json({ message: "Aucun token supprimé" });
         }
     }
 
@@ -313,21 +340,88 @@ class AuthController {
             if (!userInfo) {
                 throw new Error("Erreur lors de la récupération des informations utilisateur");
             }
-            // Ici, vous pouvez créer ou mettre à jour l'utilisateur dans votre base de données
-            // et générer des tokens JWT pour l'authentification
-            /* userInfo <===> informationsUserConsole = {
-                id: '102734705495136704979',
-                email: 'noahbello9742017@gmail.com',
-                verified_email: true,
-                name: 'Antoine Tafilet',
-                given_name: 'Antoine',
-                family_name: 'Tafilet',
-                picture: 'https://lh3.googleusercontent.com/a/ACg8ocIZjRn1NOWHUcovuIXEwnP5YFD6hVAl5OjQVh65b9Y6S9D6Qw=s96-c'
-            } */
+
+            let user = null;
+            try {
+                const userResponse = await axios.get(`${process.env.USER_URL}filtrer/email/${userInfo.email}`);
+                user = userResponse.data;
+            } catch (err: any) {
+                if (err.response && err.response.status === 404) {
+                    user = null;
+                } else {
+                    console.error("Erreur lors de la recherche user:", err);
+                    throw err;
+                }
+            }
+            if (!user) {
+                const newUser: Register = { name: userInfo.family_name, fname: userInfo.given_name, email: userInfo.email, login: userInfo.name };
+                const createResponse = await axios.post(`${process.env.USER_URL}`, newUser);
+                user = createResponse.data;
+            }
+
+            const { issuedAt, deviceFingerprint } = Outils.createData(req);
+            if (!issuedAt || !deviceFingerprint) {
+                throw new Error("Erreur lors de la création des données de token");
+            }
+
+            const expiresInAccess: number = Outils.createExpiresIn();
+            if (!expiresInAccess) {
+                throw new Error("Erreur lors de la création de l'expiration de l'accès");
+            }
+
+            const data: string = `${user._id}${user.role}${issuedAt}${expiresInAccess}${deviceFingerprint}`;
+            const { nonce, proofOfWork } = Outils.createNonce(data);
+            if (!nonce || !proofOfWork) {
+                throw new Error("Erreur lors de la création des données de nonce et proofOfWork");
+            }
+
+            const payloadAccess: PayloadAccess = {
+                userId: new ObjectId(user._id), role: user.role,
+                issuedAt, expiresIn: expiresInAccess, nonce, proofOfWork,
+                scope: ['read', 'write'], issuer: "authServer",
+                deviceFingerprint
+            }
+            
+            const tokenAccess: string = Outils.generateToken(payloadAccess);
+            if (!tokenAccess) {
+                throw new Error("Erreur lors de la création du token");
+            }
+
+            const expiresInRefresh: number = Outils.createExpiresIn(false);
+            if (!expiresInRefresh) {
+                throw new Error("Erreur lors de la création de l'expiration du rafraichissement");
+            }
+
+            const payloadRefresh: PayloadRefresh = {
+                userId: new ObjectId(user._id), issuedAt,
+                expiresIn: expiresInRefresh, deviceFingerprint
+            };
+            
+            const tokenRefresh: string = Outils.generateToken(payloadRefresh);
+            if (!tokenRefresh) {
+                throw new Error("Erreur lors de la création du token");
+            }
+
+            const tokenObjet: Tokens = { tokenAccess: `Bearer ${tokenAccess}`, tokenRefresh }
+            if (!tokenObjet) {
+                throw new Error("Erreur lors de la création du token dans la base de données");
+            }
+
+            const tokenExisteBDD = await TokenModel.collection.updateOne(
+                { userId: new ObjectId(user._id) },
+                { $set: tokenObjet }, { upsert: true }
+            );
+            if (!(tokenExisteBDD.modifiedCount === 1 || tokenExisteBDD.upsertedCount === 1)) {
+                throw new Error("Erreur lors de la création ou modification du token dans la base de données");
+            }
+
+            res.cookie("tokenAccess", `Bearer ${tokenAccess}`, { httpOnly: true, secure: true, sameSite: "strict" });
+            res.cookie("tokenRefresh", tokenRefresh, { httpOnly: true, secure: true, sameSite: "strict" });
 
             const redirectUrl = "http://localhost:4200/accueil";
             res.redirect(redirectUrl);
         } catch (err) {
+            console.error("Erreur dans googleAuthCallback :", err);
             const redirectUrl = "http://localhost:4200/";
             res.redirect(redirectUrl);
         }

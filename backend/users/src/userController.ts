@@ -9,7 +9,7 @@ import axios from 'axios';
 interface UtilisateurCréation {
     name: string; fname: string;
     email: string; login: string;
-    role: ObjectId; salt: string;
+    role: ObjectId[]; salt: string;
 }
 
 interface Utilisateur {
@@ -96,7 +96,8 @@ class UserController {
 
             let user = await UserModel.collection.findOne({ email: email }, { projection: { _id: 1, role: 1, salt: 1, password: 1 } });
             if (!user) {
-                throw new Error("Utilisateur non trouvée");
+                res.status(404).json({ message: "Utilisateur non trouvé" });
+                return;
             }
             res.status(201).json(user);
         }
@@ -148,7 +149,7 @@ class UserController {
                 throw new Error("Erreur lors de la récupération du rôle par défaut");
             }
 
-            const role = new ObjectId(response.data._id);
+            const role = [new ObjectId(response.data._id)];
             const { name, fname, email, login } = req.body;
             if (!name || !fname || !email || !login) {
                 throw new Error("Information manquant");
@@ -176,6 +177,11 @@ class UserController {
                 throw new Error("Utilisateur non crée");
             }
 
+            // const response = await axios.post(`${process.env.PANIER_URL}`, user.insertedId);
+            // if (!response || !response.data) {
+            //     throw new Error("Erreur lors de la récupération du user par défaut");
+            // }
+
             res.status(201).json({ salt: salt, _id: user.insertedId, role: role });
         }
         catch (err) {
@@ -185,13 +191,11 @@ class UserController {
 
     async updateUserRegister(req: Request, res: Response): Promise<void> {
         try {
-            // Récupérer le mot de passe hasher en FrontEnd
             const { email, salt, motDePasse, /* mdpHasher */ } = req.body;
-            if (!email || !salt || !motDePasse /* || !mdpHasher */) {
+            if (!email || !salt || !motDePasse) {
                 throw new Error("Information manquant");
             }
 
-            // Hasher le mot de passe en FrontEnd
             const passwordHasher = crypto.createHash('sha256').update(motDePasse + process.env.PEPPER + salt).digest('hex');
             if (!passwordHasher) {
                 throw new Error("Erreur lors de la création du hash du mot de passe");
