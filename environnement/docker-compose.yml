@@ -6,6 +6,7 @@ services:
   bdd_oltp:
     container_name: bdd_oltp
     image: postgres:17
+    restart: always
     env_file:
       - .env
     environment:
@@ -27,7 +28,7 @@ services:
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: root
       CLICKHOUSE_DB: default
-    restart: unless-stopped
+    restart: always
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -38,43 +39,55 @@ services:
 
   # API OLTP en TYPESCRIPT
   api_oltp:
-    container_name: api_oltp
+    # container_name: api_oltp
+    restart: always
     build:
       context: ../backend/api_oltp
     env_file:
       - ../backend/api_oltp/.env
     volumes:
       - ../backend/api_oltp:/usr/src/app
-    ports:
-      - 3002:3002
+    # ports:
+    #   - 3002:3002
     depends_on:
       - bdd_oltp
     networks:
       - reseau_projet
+    deploy:
+      replicas: 2
     command: ["sh", "./install.sh", "bdd_oltp"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   # API OLAP en PYTHON
   api_olap:
-    container_name: api_olap
+    # container_name: api_olap
     build:
       context: ../backend/api_olap
+    restart: always
     environment:
       - PYTHONPATH=/usr/src/app
     env_file:
       - ../backend/api_olap/.env
     volumes:
       - ../backend/api_olap:/usr/src/app
-    ports:
-      - "5000:5000"
+    # ports:
+    #   - "5000:5000"
     depends_on:
       - clickhouse
     networks:
       - reseau_projet
+    deploy:
+      replicas: 2
 
   # API GATEWAY (NGINX)
   nginx:
     container_name: nginx-container
     image: nginx:latest
+    restart: always
     ports:
       - "3001:3001"
     volumes:
@@ -102,39 +115,48 @@ services:
       - reseau_projet
 
   microservice_authentification:
-    container_name: microservice_authentification
+    # container_name: microservice_authentification
     build:
       context: ../backend/authentification
+    restart: always
     volumes:
       - ../backend/authentification:/usr/src/app
-    ports:
-      - 5003:5003
+    # ports:
+    #   - 5003:5003
     networks:
       - reseau_projet
+    deploy:
+      replicas: 2
     command: ["sh", "./install.sh"]
 
   microservice_role:
-    container_name: microservice_role
+    # container_name: microservice_role
     build:
       context: ../backend/roles
+    restart: always
     volumes:
       - ../backend/roles:/usr/src/app
-    ports:
-      - 5002:5002
+    # ports:
+    #   - 5002:5002
     networks:
       - reseau_projet
+    deploy:
+      replicas: 2
     command: ["sh", "./install.sh"]
 
   microservice_user:
-    container_name: microservice_user
+    # container_name: microservice_user
     build:
       context: ../backend/users
+    restart: always
     volumes:
       - ../backend/users:/usr/src/app
-    ports:
-      - 5001:5001
+    # ports:
+    #   - 5001:5001
     networks:
       - reseau_projet
+    deploy:
+      replicas: 2
     command: ["sh", "./install.sh"]
 
 # Pour créer un network : docker network create "nom_du_reseau"
