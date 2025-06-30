@@ -5,6 +5,7 @@ import authMiddleware from './authMiddleware';
 import roleMiddleware from './roleMiddleware';
 
 const authController: AuthController = new AuthController();
+// MIDDLEWARE
 router.get("/check", authMiddleware, roleMiddleware(["client"]), (req, res) => {
     if (req.auth) {
         res.json({ loggedIn: true, userId: req.auth.userId });
@@ -14,6 +15,7 @@ router.get("/check", authMiddleware, roleMiddleware(["client"]), (req, res) => {
 });
 
 // GET
+router.get('/health', (req, res) => { res.status(200).send('OK'); });
 router.get('/google', authController.googleAuth);
 router.get('/google/callback', authController.googleAuthCallback);
 

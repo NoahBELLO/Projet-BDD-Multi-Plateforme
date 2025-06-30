@@ -21,3 +21,12 @@ frontend-test:
 clean:
 	cd ./environnement && docker compose down -v
 	docker system prune -f
+
+electron:
+	cd electron_app && npm start
+
+windows:
+	cd electron_app && npm run build -- --win
+
+linux:
+	cd electron_app && npm run build -- --linux

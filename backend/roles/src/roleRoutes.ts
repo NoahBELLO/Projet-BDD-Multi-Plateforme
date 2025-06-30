@@ -5,6 +5,7 @@ const router: Router = Router();
 const roleController: RoleController = new RoleController();
 
 // GET
+router.get('/health', (req, res) => { res.status(200).send('OK'); });
 router.get('/', roleController.getAllRoles);
 router.get('/id/:id', roleController.getRoleById);
 router.get('/name/:name', roleController.getRoleByName);

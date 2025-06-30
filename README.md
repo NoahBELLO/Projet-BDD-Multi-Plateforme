@@ -98,11 +98,24 @@ Projet-BDD-Multi-Plateforme/
 
 ## 🚀 Démarrage rapide
 
-### Prérequis
+### Prérequis pour lancer le projet via Docker
 
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
-- (Optionnel pour Electron) [Node.js](https://nodejs.org/) installé localement
+
+### Prérequis pour lancer l'application Electron
+
+- [Node.js](https://nodejs.org/) installé localement
+
+### Prérequis pour utiliser le Makefile
+
+- **Linux / macOS** : `make` est généralement déjà installé.
+- **Windows** :
+  - Installe [Git Bash](https://gitforwindows.org/) ou [WSL](https://learn.microsoft.com/fr-fr/windows/wsl/install) (Windows Subsystem for Linux) pour avoir la commande `make`.
+  - Ou installe [GnuWin Make](http://gnuwin32.sourceforge.net/packages/make.htm) et ajoute-le à ton PATH.
+  - Puis lancer la commande suivante dans le terminal : sudo apt install make
+
+> Si tu n’as pas `make`, tu peux toujours lancer les commandes Docker manuellement (voir plus haut).
 
 ### Installation
 
@@ -126,7 +139,8 @@ Projet-BDD-Multi-Plateforme/
    ou
 
    ```bash
-   docker-compose -f environnement/docker-compose.yml up --build
+   cd ./environnement
+   docker-compose up --build
    ```
 
 4. **Accéder à l’application :**

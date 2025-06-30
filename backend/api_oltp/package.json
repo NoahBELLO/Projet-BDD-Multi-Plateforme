@@ -1,5 +1,5 @@
 {
-  "name": "authentification",
+  "name": "api_oltp",
   "version": "1.0.0",
   "main": "app.ts",
   "scripts": {

@@ -57,7 +57,7 @@ services:
       replicas: 2
     command: ["sh", "./install.sh", "bdd_oltp"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/apiPostgreSql/health"]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -106,7 +106,7 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    restart: always
+    # restart: always
     ports:
       - "4200:4200"
     volumes:
@@ -128,6 +128,11 @@ services:
     deploy:
       replicas: 2
     command: ["sh", "./install.sh"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5003/authentification/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   microservice_role:
     # container_name: microservice_role
@@ -143,6 +148,11 @@ services:
     deploy:
       replicas: 2
     command: ["sh", "./install.sh"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5002/role/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   microservice_user:
     # container_name: microservice_user
@@ -158,6 +168,11 @@ services:
     deploy:
       replicas: 2
     command: ["sh", "./install.sh"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5001/user/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 # Pour créer un network : docker network create "nom_du_reseau"
 networks:
