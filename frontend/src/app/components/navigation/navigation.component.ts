@@ -14,7 +14,8 @@ export class NavigationComponent {
   constructor(public authService: AuthentificationService, private router: Router) { }
 
   logout() {
-    this.authService.logout();
-    this.router.navigate(['/connexion']);
+    this.authService.logout().subscribe({
+      complete: () => this.router.navigate(['/connexion'])
+    });
   }
 }

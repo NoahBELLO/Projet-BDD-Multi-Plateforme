@@ -49,10 +49,10 @@ export class AuthentificationService {
     });
   }
 
-  logout(): void {
-    this.http.post(`${this.apiUrl}logout`, {}, { withCredentials: true }).subscribe(() => {
-      this.loggedInSubject.next(false);
-    });
+  logout(): Observable<any> {
+    return this.http.post(`${this.apiUrl}logout`, {}, { withCredentials: true }).pipe(
+      tap(() => this.loggedInSubject.next(false))
+    );
   }
 
   async hashSHA256(message: string): Promise<string> {
